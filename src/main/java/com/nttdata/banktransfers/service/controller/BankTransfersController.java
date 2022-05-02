@@ -1,5 +1,8 @@
 package com.nttdata.banktransfers.service.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+ 
 import com.nttdata.banktransfers.service.entity.BankTransfers;
+import com.nttdata.banktransfers.service.model.Transfers;
 import com.nttdata.banktransfers.service.service.BankTransfersService;
 
 import lombok.extern.log4j.Log4j2;
@@ -73,5 +78,17 @@ public class BankTransfersController {
 			return bankTransfersService.delete(bankTransfers.getIdBankTransfers())
 					.then(Mono.just(ResponseEntity.ok().build()));
 		});
+	}
+	@PostMapping("/wireTransfer")
+	public Mono<ResponseEntity<Map<String, Object>>> wireTransfer(
+			@RequestBody Transfers transfers) {
+		return bankTransfersService.wireTransfer(transfers)
+				.map(_val -> ResponseEntity.ok().body(_val))
+				.onErrorResume(e -> {
+					log.info("Status:" + HttpStatus.BAD_REQUEST + " menssage" + e.getMessage());
+					Map<String, Object> hashMap = new HashMap<>();
+					hashMap.put("Error", e.getMessage());
+					return Mono.just(ResponseEntity.badRequest().body(hashMap));
+				}).defaultIfEmpty(ResponseEntity.noContent().build());
 	}
 }
