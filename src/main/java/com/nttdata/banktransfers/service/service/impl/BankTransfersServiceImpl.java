@@ -356,6 +356,7 @@ public class BankTransfersServiceImpl implements BankTransfersService {
 			this.save(bankTransfers).subscribe();
 			map.put("Transfers", transfers);
 			map.put("status", "success");
+			map.put("idBankTransfers", bankTransfers.getIdBankTransfers());
 		}
 
 		return Mono.just(map);
